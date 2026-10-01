@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.2 — 2026-10-01
+
+- Corrigida a disputa entre pan horizontal nativo e navegação por swipe no mobile.
+- Validação HACS e CI acionados também em pushes para `master`.
+
 ## 1.0.1 — 2026-10-01
 
 - Estabilizada a sincronização dos testes de navegação em diferentes plataformas Chromium.

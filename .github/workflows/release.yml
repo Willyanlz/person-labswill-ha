@@ -1,7 +1,7 @@
 name: Validate and release
 on:
   push:
-    branches: [main]
+    branches: [main, master]
     tags: ['v*']
   pull_request:
 permissions:

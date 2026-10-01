@@ -1,4 +1,4 @@
-/*! Person LabsWill HA v1.0.1 | MIT | github.com/Willyanlz/person-labswill-ha */
+/*! Person LabsWill HA v1.0.2 | MIT | github.com/Willyanlz/person-labswill-ha */
 /**
  * @license
  * Copyright 2019 Google LLC
@@ -127,7 +127,7 @@
  */var ne=()=>new kt,kt=class{},At=new WeakMap,le=M(class extends nt{render(o){return c}update(o,[t]){let e=t!==this.G;return e&&this.rt(void 0),(e||this.lt!==this.ct)&&(this.G=t,this.ht=o.options?.host,this.rt(this.ct=o.element)),c}rt(o){if(this.G!==void 0)if(this.isConnected||(o=void 0),typeof this.G=="function"){let t=this.ht??globalThis,e=At.get(t);e===void 0&&(e=new WeakMap,At.set(t,e)),e.get(this.G)!==void 0&&this.G.call(this.ht,void 0),e.set(this.G,o),o!==void 0&&this.G.call(this.ht,o)}else this.G.value=o}get lt(){return typeof this.G=="function"?At.get(this.ht??globalThis)?.get(this.G):this.G?.value}disconnected(){this.lt===this.ct&&this.rt(void 0)}reconnected(){this.rt(this.ct)}});var Et=o=>o.composedPath().some(t=>t?.matches?.("input,textarea,button:not([data-swipe-surface]),select,label,form,[contenteditable=true]")),St=class extends b{static properties={pages:{attribute:!1},options:{attribute:!1},t:{attribute:!1},index:{state:!0}};static styles=_`
     :host{display:block;height:100%;min-width:0} *{box-sizing:border-box}
     .shell{display:flex;flex-direction:column;height:100%;min-height:0}
-    .viewport{display:flex;flex:1;min-height:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x pan-y;outline-offset:-3px;perspective:1000px}
+    .viewport{display:flex;flex:1;min-height:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-y;outline-offset:-3px;perspective:1000px}
     .viewport::-webkit-scrollbar{display:none} .viewport.disabled{overflow:hidden;touch-action:pan-y}
     .viewport.control-touch{overflow-x:hidden;scroll-snap-type:none;touch-action:pan-y}
     .viewport.dragging{scroll-snap-type:none;cursor:grabbing;user-select:none}

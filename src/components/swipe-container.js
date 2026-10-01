@@ -6,7 +6,7 @@ export class SwipeContainer extends LitElement {
   static styles = css`
     :host{display:block;height:100%;min-width:0} *{box-sizing:border-box}
     .shell{display:flex;flex-direction:column;height:100%;min-height:0}
-    .viewport{display:flex;flex:1;min-height:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x pan-y;outline-offset:-3px;perspective:1000px}
+    .viewport{display:flex;flex:1;min-height:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-y;outline-offset:-3px;perspective:1000px}
     .viewport::-webkit-scrollbar{display:none} .viewport.disabled{overflow:hidden;touch-action:pan-y}
     .viewport.control-touch{overflow-x:hidden;scroll-snap-type:none;touch-action:pan-y}
     .viewport.dragging{scroll-snap-type:none;cursor:grabbing;user-select:none}
