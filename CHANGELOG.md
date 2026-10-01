@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.3 — 2026-10-01
+
+- Swipe funciona na área vazia do formulário de notificação sem interferir nos controles.
+- Estados documentados de atualização do Companion App, incluindo Launch e Signaled, traduzidos em pt-BR.
+- Labels duplicadas do seletor de pessoa removidas e quatro cards validados em grid responsivo.
+- Transição slide animada sem setas visuais; YAML antigo com coverflow é migrado.
+
 ## 1.0.2 — 2026-10-01
 
 - Corrigida a disputa entre pan horizontal nativo e navegação por swipe no mobile.

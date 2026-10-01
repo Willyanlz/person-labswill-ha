@@ -17,6 +17,7 @@ export const cardStyles = css`
   :host{display:block;min-width:0}
   ha-card{display:block;overflow:hidden;box-sizing:border-box;color:var(--primary-text-color,#202124);background:var(--person-background,var(--ha-card-background,var(--card-background-color,#fff)));border-radius:var(--person-radius,20px);padding:var(--person-padding,0);height:var(--person-height,auto);aspect-ratio:var(--person-ratio,1);container-type:inline-size}
   person-central-swipe{height:100%;display:block;min-width:0}
-  .slide{flex:0 0 100%;min-width:0;height:100%;scroll-snap-align:start;scroll-snap-stop:always;box-sizing:border-box;transform-origin:center;transition:opacity .15s}
+  .slide{flex:0 0 100%;min-width:0;height:100%;scroll-snap-align:start;scroll-snap-stop:always;box-sizing:border-box;transform-origin:center;transition:opacity .22s ease,transform .22s ease}
   .slide>*{height:100%;display:block}
+  @media(prefers-reduced-motion:reduce){.slide{transition:none}}
 `;

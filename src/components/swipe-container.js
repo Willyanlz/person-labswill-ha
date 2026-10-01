@@ -1,12 +1,12 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
-const interactive = event => event.composedPath().some(el => el?.matches?.('input,textarea,button:not([data-swipe-surface]),select,label,form,[contenteditable=true]'));
+const interactive = event => event.composedPath().some(el => el?.matches?.('input,textarea,button:not([data-swipe-surface]),select,label,[contenteditable=true]'));
 export class SwipeContainer extends LitElement {
   static properties = { pages:{attribute:false}, options:{attribute:false}, t:{attribute:false}, index:{state:true} };
   static styles = css`
     :host{display:block;height:100%;min-width:0} *{box-sizing:border-box}
     .shell{display:flex;flex-direction:column;height:100%;min-height:0}
-    .viewport{display:flex;flex:1;min-height:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-y;outline-offset:-3px;perspective:1000px}
+    .viewport{display:flex;flex:1;min-height:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-y;outline-offset:-3px}
     .viewport::-webkit-scrollbar{display:none} .viewport.disabled{overflow:hidden;touch-action:pan-y}
     .viewport.control-touch{overflow-x:hidden;scroll-snap-type:none;touch-action:pan-y}
     .viewport.dragging{scroll-snap-type:none;cursor:grabbing;user-select:none}
@@ -16,7 +16,6 @@ export class SwipeContainer extends LitElement {
     button:focus-visible,.viewport:focus-visible{outline:2px solid var(--primary-color,#03a9f4)}
     button:disabled{opacity:.35;cursor:default} .dot::before{content:'';display:block;margin:auto;width:6px;height:6px;border-radius:50%;background:var(--divider-color,#aaa)}
     .dot[aria-current=true]::before{background:var(--primary-color,#03a9f4);width:14px;border-radius:4px}
-    @media(prefers-reduced-motion:reduce){::slotted(*){transform:none!important}}
   `;
   constructor() {
     super();this.pages=[];this.index=0;this.viewport=createRef();this._raf=0;this._controlTouch=null;
@@ -47,8 +46,9 @@ export class SwipeContainer extends LitElement {
     const progress=viewport.scrollLeft/viewport.clientWidth;
     const slides=[...this.children];
     slides.forEach((slide,index)=>{
-      const delta=Math.max(-1,Math.min(1,index-progress));
-      slide.style.transform=this.options?.effect==='coverflow' ? `rotateY(${delta*-12}deg) scale(${1-Math.abs(delta)*.06})` : '';
+      const distance=Math.min(1,Math.abs(index-progress));
+      slide.style.opacity=String(1-distance*.2);
+      slide.style.transform=`scale(${1-distance*.025})`;
       slide.inert=index!==this.index;
       slide.setAttribute('aria-hidden',String(index!==this.index));
     });
@@ -68,7 +68,6 @@ export class SwipeContainer extends LitElement {
     this._drag={id:event.pointerId,x:event.clientX,start:this.viewport.value.scrollLeft,index:this.index};
     this.viewport.value.setPointerCapture(event.pointerId);
     this.viewport.value.classList.add('dragging');
-    event.preventDefault();
   }
   _move(event) {if(this._drag) this.viewport.value.scrollLeft=this._drag.start+this._drag.x-event.clientX;}
   _up(event) {
@@ -120,9 +119,7 @@ export class SwipeContainer extends LitElement {
       @scroll=${this._scroll} @keydown=${this._key} @pointerdown=${this._down} @pointermove=${this._move} @pointerup=${this._up}
       @pointercancel=${() => {this._drag=null;this.viewport.value?.classList.remove('dragging');this.go(this.index,false);}}
       @touchstart=${this._touchStart} @touchmove=${this._touchMove} @touchend=${this._touchEnd} @touchcancel=${()=>{this._touch=null;this._controlTouch=null;this.viewport.value?.classList.remove('control-touch');}}><slot></slot></div>
-      ${multiple ? html`<nav aria-label="Páginas"><button aria-label=${t('previous')} ?disabled=${!this.options.loop&&this.index===0} @click=${()=>this.go(this.index-1)}>‹</button>
-        ${this.options.show_indicators ? this.pages.map((id,i)=>html`<button class="dot" aria-label=${t(id)} aria-current=${String(i===this.index)} @click=${()=>this.go(i)}></button>`) : nothing}
-        <button aria-label=${t('next')} ?disabled=${!this.options.loop&&this.index===this.pages.length-1} @click=${()=>this.go(this.index+1)}>›</button></nav>` : nothing}
+      ${multiple&&this.options.show_indicators ? html`<nav aria-label="Páginas">${this.pages.map((id,i)=>html`<button class="dot" aria-label=${t(id)} aria-current=${String(i===this.index)} @click=${()=>this.go(i)}></button>`)}</nav>` : nothing}
     </div>`;
   }
 }

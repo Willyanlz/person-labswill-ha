@@ -131,7 +131,7 @@ swipe:
   enabled: true
   show_indicators: true
   loop: false
-  effect: coverflow
+  effect: slide
 
 colors:
   home: '#50A14F'
@@ -158,7 +158,7 @@ O serviço em `notify_service` precisa existir em **Ferramentas de desenvolvedor
 | `details` | Foto, nome, localização e linhas de sensores disponíveis. Bateria e estado de carga são agrupados quando ambos estão habilitados. |
 | `notification` | Mensagem, toggle Critical opcional, envio e feedback. A página só pode ser habilitada quando `notify_service` é válido. |
 
-O card permite arrastar horizontalmente com mouse ou dedo e navegar pelas setas/dots; foco no card também aceita as setas do teclado. Com uma única página ativa não há navegação ou indicadores desnecessários. A configuração `swipe.enabled: false` desativa o gesto horizontal, mas mantém a navegação pelos controles. `swipe.loop: true` permite circular entre a primeira e a última página.
+O card permite arrastar horizontalmente com mouse ou dedo; os dots e as setas do teclado também navegam entre páginas. A transição combina slide horizontal com um leve ajuste de opacidade e escala, sem rotação 3D. Com uma única página ativa não há navegação ou indicadores desnecessários. A configuração `swipe.enabled: false` desativa o gesto horizontal, mas mantém a navegação por teclado. `swipe.loop: true` permite circular entre a primeira e a última página.
 
 Gestos iniciados em textarea, toggle, botão ou outros controles não navegam pelas páginas. Isso preserva digitação, seleção e operação por toque. O formulário mantém mensagem e Critical ao navegar ou atualizar estados; após envio bem-sucedido, limpa os campos. Trocar a pessoa ou o serviço redefine o rascunho para evitar enviar para o destinatário errado.
 
@@ -167,7 +167,7 @@ Gestos iniciados em textarea, toggle, botão ou outros controles não navegam pe
 O editor está dividido em **Pessoa**, **Páginas**, **Perfil**, **Status**, **Sensores**, **Informações**, **Notificação** e **Aparência**. Ele usa o seletor de entidades do Home Assistant quando disponível e mantém controles HTML como alternativa. Alterações emitem `config-changed` e preservam opções avançadas que não são expostas na interface.
 
 - **Pessoa:** seleciona apenas entidades do domínio `person` e mostra o nome como preview.
-- **Páginas:** habilita ou desabilita cada página e altera a ordem com os botões de subir/descer. Também controla swipe, indicadores, loop e efeito.
+- **Páginas:** habilita ou desabilita cada página e altera a ordem com os botões de subir/descer. Também controla swipe, indicadores e loop.
 - **Perfil:** escolhe o modo da foto; tamanho e ajuste aparecem para imagem circular, posição aparece para background.
 - **Status:** habilita a barra e, quando ativa, permite configurar cada indicador, posição e fundo.
 - **Sensores:** escolhe as entidades opcionais de bateria, estado da bateria, ringer e Bluetooth.
@@ -221,7 +221,7 @@ As opções são compatíveis com YAML mesmo quando o card foi criado pelo edito
 | `swipe.enabled` | `true` | Habilita swipe/arraste horizontal quando há mais de uma página. |
 | `swipe.show_indicators` | `true` | Mostra os dots de navegação. |
 | `swipe.loop` | `false` | Permite navegar circularmente. |
-| `swipe.effect` | `coverflow` | `coverflow` ou `slide`. |
+| `swipe.effect` | `slide` | Slide horizontal animado com transição sutil de opacidade e escala; valores antigos `coverflow` são convertidos para `slide`. |
 | `colors.*` | cores do card | Sobrescreve as cores de localização, bateria, ringer e Bluetooth; consulte abaixo. |
 
 Sensores não configurados são omitidos; sensores configurados que desaparecem são apresentados como indisponíveis. Um estado de pessoa que não seja `home` nem `not_home` é tratado como nome de zona personalizada.

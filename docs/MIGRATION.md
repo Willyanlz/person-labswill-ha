@@ -5,7 +5,7 @@ e briefing funcional. Nenhum nome, sensor ou serviço pessoal da referência é 
 
 | Comportamento de origem | Nova arquitetura |
 | --- | --- |
-| swipe-card com três páginas e coverflow | `components/swipe-container.js`: scroll-snap, efeito CSS coverflow, toque, drag, teclado, loop opcional e indicadores |
+| swipe-card com três páginas e coverflow | `components/swipe-container.js`: scroll-snap com transição horizontal, toque, drag, teclado, loop opcional e indicadores |
 | button-card quadrado, padding 0, raio 20 | `styles.js` e `appearance`, dimensões responsivas |
 | Foto 65%, central e circular, fallback mdi:account | `profile-page.js`; também modos background e none |
 | Barra superior clara, opacidade .85, raio 18 | Barra modular em profile; fundo segue o tema e aceita substituição |
@@ -22,7 +22,7 @@ e briefing funcional. Nenhum nome, sensor ou serviço pessoal da referência é 
 
 - Sem button-card, swipe-card, card-mod, stack-in-card ou notify-card. Lit é incluído
   no bundle, sem CDN ou instalação adicional no Home Assistant.
-- Coverflow é uma implementação CSS própria; não é uma cópia pixel a pixel do Swiper.
+- A transição padrão é um slide horizontal simples com CSS scroll-snap; o efeito 3D coverflow foi removido por não ficar legível no card compacto.
 - Removidos o timeout de 250 ms e o registro repetido de listeners do protótipo:
   lifecycle Lit e eventos declarativos garantem inicialização e limpeza.
 - Estados ausentes não são apresentados como Bluetooth desligado ou bateria verde.

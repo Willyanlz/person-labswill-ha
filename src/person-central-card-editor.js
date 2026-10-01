@@ -50,7 +50,7 @@ export class PersonCentralCardEditor extends LitElement {
     ${options.map(([value,text])=>html`<option value=${value} .selected=${get(this._c,path)===value}>${text}</option>`)}</select></label>`;}
   _entity(path,label,person=false) {
     const value=get(this._c,path)||'';
-    if(customElements.get('ha-selector')) return html`<div class="field"><span>${label}</span><ha-selector data-path=${path} .hass=${this.hass}
+    if(customElements.get('ha-selector')) return html`<div class="field"><ha-selector data-path=${path} .hass=${this.hass}
       .selector=${{entity:person?{filter:{domain:'person'}}:{}}} .value=${value}
       .label=${label} @value-changed=${e=>{e.stopPropagation();this._set(path,e.detail.value);}}></ha-selector></div>`;
     const ids=Object.keys(this.hass?.states||{}).filter(id=>!person||id.startsWith('person.'));
@@ -65,14 +65,14 @@ export class PersonCentralCardEditor extends LitElement {
     const services=Object.keys(this.hass?.services?.notify||{}).map(key=>`notify.${key}`);
     return html`<p class="hint">Person Central Card · LabsWill</p>
       ${this._error?html`<p class="error" role="alert">${this._error}</p>`:nothing}
-      <details open><summary>Pessoa</summary>${this._entity('person','Pessoa',true)}
+      <details open><summary>Pessoa</summary>${this._entity('person','Entidade da pessoa',true)}
         <div class="preview">${this.hass?.states?.[c.person]?.attributes?.friendly_name||'Selecione uma pessoa para visualizar o card.'}</div>
-        ${this._select('language','Idioma',[['pt','Português'],['en','English'],['auto','Home Assistant']])}</details>
+        ${this._select('language','Idioma',[['pt','Português'],['en','Inglês'],['auto','Idioma do Home Assistant']])}</details>
       <details open><summary>Páginas</summary>${PAGE_IDS.map(id=>this._toggle(`pages.${id}.enabled`,names[id]))}
         <p class="hint">Use as setas para ordenar as páginas habilitadas.</p>
         ${c.page_order.map((id,index)=>html`<div class="page-row"><span>${names[id]}</span><button type="button" aria-label=${`Subir ${names[id]}`} ?disabled=${index===0} @click=${()=>this._move(id,-1)}>↑</button><button type="button" aria-label=${`Descer ${names[id]}`} ?disabled=${index===c.page_order.length-1} @click=${()=>this._move(id,1)}>↓</button></div>`)}
         ${this._toggle('swipe.enabled','Permitir swipe')}${this._toggle('swipe.show_indicators','Indicadores de página')}${this._toggle('swipe.loop','Navegação circular')}
-        ${this._select('swipe.effect','Efeito',[['coverflow','Coverflow'],['slide','Deslizar']])}</details>
+      </details>
       ${c.pages.profile.enabled?html`<details><summary>Perfil</summary>
         ${this._select('profile.image.mode','Modo da imagem',[['circle','Redonda'],['background','Fundo'],['none','Nenhuma']])}
         ${p.image.mode==='circle'?html`${this._text('profile.image.size','Tamanho da imagem (%)','number',10,100)}${this._select('profile.image.object_fit','Ajuste',[['cover','Preencher'],['contain','Imagem inteira']])}`:nothing}
@@ -89,8 +89,8 @@ export class PersonCentralCardEditor extends LitElement {
           placeholder="notify.mobile_app_seu_celular" @input=${e=>this._set('notification.notify_service',e.target.value)}></label>
           <datalist id="notify-services">${services.map(service=>html`<option value=${service}></option>`)}</datalist>
           ${!n.notify_service?html`<p class="error" role="alert">Selecione um serviço notify para habilitar o envio.</p>`:nothing}
-          ${this._text('notification.title','Título da notificação')}${this._toggle('notification.critical.enabled','Permitir Critical (iOS)')}
-          ${n.critical.enabled?html`${this._toggle('notification.critical.default','Critical ativado inicialmente')}${this._text('notification.critical.volume','Volume Critical','number',0,1,.05)}`:nothing}`:nothing}
+          ${this._text('notification.title','Título da notificação')}${this._toggle('notification.critical.enabled','Permitir alertas críticos (iOS)')}
+          ${n.critical.enabled?html`${this._toggle('notification.critical.default','Alertas críticos ativados por padrão')}${this._text('notification.critical.volume','Volume do alerta crítico','number',0,1,.05)}`:nothing}`:nothing}
       </details>
       <details><summary>Aparência</summary>${this._text('appearance.border_radius','Raio dos cantos (px)','number',0,100)}${this._text('appearance.card_height','Altura fixa opcional (px)','number',180,1600)}
         ${this._text('appearance.aspect_ratio','Proporção largura/altura','number',.4,3,.1)}${this._text('appearance.background','Fundo (auto ou cor CSS)')}${this._text('appearance.padding','Espaçamento interno (px)','number',0,100)}</details>`;

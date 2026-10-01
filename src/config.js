@@ -10,7 +10,7 @@ export const DEFAULTS = {
   sensors: {},
   notification: { notify_service: '', title: 'Central', critical: { enabled: true, default: false, volume: 1 } },
   appearance: { border_radius: 20, aspect_ratio: 1, padding: 0, background: 'auto' },
-  swipe: { enabled: true, show_indicators: true, loop: false, effect: 'coverflow' },
+  swipe: { enabled: true, show_indicators: true, loop: false, effect: 'slide' },
   colors: { home: '#50A14F', away: '#e45649', zone: '#52adff', unknown: 'var(--secondary-text-color)',
     bluetooth_on: '#52adff', bluetooth_off: '#e45649', battery_high: '#50A14F', battery_medium: '#FFA500',
     battery_low: '#e45649', ringer_normal: '#50A14F', ringer_vibrate: '#FFA500', ringer_silent: '#e45649' },
@@ -34,6 +34,7 @@ export function normalize(raw, validate = true) {
   }
   if (raw?.appearance?.profile_image_size !== undefined && raw?.profile?.image?.size === undefined) config.profile.image.size = raw.appearance.profile_image_size;
   if (raw?.appearance?.status_background !== undefined && raw?.profile?.status?.background === undefined) config.profile.status.background = raw.appearance.status_background;
+  if (config.swipe.effect === 'coverflow') config.swipe.effect = 'slide';
   const enabled = enabledPages(config);
   config.page_order = raw?.page_order ? [...raw.page_order] : enabled;
   if (!validate) return config;
@@ -61,7 +62,7 @@ export function normalize(raw, validate = true) {
     [config.profile.image.mode, ['circle', 'background', 'none'], 'image.mode'],
     [config.profile.image.object_fit, ['cover', 'contain'], 'image.object_fit'],
     [config.profile.status.position, ['top', 'bottom'], 'status.position'],
-    [config.swipe.effect, ['coverflow', 'slide'], 'swipe.effect'],
+    [config.swipe.effect, ['slide'], 'swipe.effect'],
     [config.language, ['pt', 'en', 'auto'], 'language'],
   ]) if (!allowed.includes(value)) throw new Error(`${name}: ${allowed.join(', ')}.`);
   for (const entity of Object.values(config.sensors)) {

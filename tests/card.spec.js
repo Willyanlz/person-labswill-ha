@@ -28,6 +28,8 @@ async function go(page,id){
 test('minimal card, defaults, picker and person suggestions',async({page})=>{
   await mount(page);
   await expect(page.locator('[data-page]')).toHaveCount(2);
+  await expect(page.locator('person-central-swipe nav button')).toHaveCount(2);
+  await expect(page.locator('person-central-swipe nav button[aria-label="Próxima página"]')).toHaveCount(0);
   await expect(page.locator('[data-status]')).toHaveCount(1);
   expect(await page.evaluate(()=>window.customCards[0].getEntitySuggestion(hass,'person.example').config.person)).toBe('person.example');
   expect(await page.evaluate(()=>window.customCards[0].getEntitySuggestion(hass,'light.example'))).toBeNull();
@@ -42,6 +44,16 @@ test('status values, thresholds, zones and missing entities',async({page})=>{
     await expect(page.locator('[data-status="battery"]')).toHaveCSS('color',color);
   }
   await go(page,'Informações');await expect(page.locator('[data-detail="battery"]')).toContainText('Carregando');
+  for(const [state,label] of [
+    ['Manual','Atualização manual'],['Launch','Inicialização do app'],['Periodic','Atualização periódica'],
+    ['Significant Location Change','Mudança significativa de localização'],['Geographic Region Entered','Entrada em zona geográfica'],
+    ['Geographic Region Exited','Saída de zona geográfica'],['Push Notification','Notificação push'],
+    ['Background Fetch','Atualização em segundo plano'],['Siri','Siri'],['iBeacon Region Entered','Entrada em região iBeacon'],
+    ['Registration','Registro do dispositivo'],['Signaled','Alteração detectada'],
+  ]){
+    await page.evaluate(state=>{hass.states['sensor.ringer']={state};card.hass={...hass};},state);
+    await expect(page.locator('[data-detail="ringer"] .value')).toHaveText(label);
+  }
   await page.evaluate(()=>{hass.states['person.example']={state:'Trabalho',attributes:{friendly_name:'Alex'}};card.hass={...hass};});
   await expect(page.locator('[data-detail="location"]')).toContainText('Trabalho');
   await page.evaluate(()=>{delete hass.states['sensor.battery'];delete hass.states['person.example'];card.hass={...hass};});
@@ -51,6 +63,7 @@ test('status values, thresholds, zones and missing entities',async({page})=>{
 test('normal and critical notify payload, empty input and success reset',async({page})=>{
   await mount(page,full);await go(page,'Notificação');
   const form=page.locator('person-central-notification');
+  await expect(form).toContainText('Crítico');
   await form.locator('button').click();await expect(form.locator('.feedback')).toHaveText('Digite uma mensagem.');
   await form.locator('textarea').fill('  Olá de casa  ');await form.locator('button').click();
   await expect(form.locator('.feedback')).toHaveText('Notificação enviada.');
@@ -87,10 +100,11 @@ test('one page disables swipe; order, loop, hidden indicators and disabled swipe
   await page.evaluate(()=>card.setConfig({person:'person.example',page_order:['details','profile'],swipe:{loop:true,enabled:false,show_indicators:false}}));
   await expect(page.locator('.slide').first()).toHaveAttribute('data-page','details');
   await expect(page.locator('person-central-swipe .dot')).toHaveCount(0);
+  await expect(page.locator('person-central-swipe nav')).toHaveCount(0);
   await expect(page.locator('[data-page="profile"]')).toHaveAttribute('aria-hidden','false');
-  await page.locator('person-central-swipe button[aria-label="Próxima página"]').click();
+  const viewport=page.locator('person-central-swipe .viewport');await viewport.focus();await viewport.press('ArrowRight');
   await expect(page.locator('[data-page="details"]')).toHaveAttribute('aria-hidden','false');
-  await page.locator('person-central-swipe button[aria-label="Página anterior"]').click();
+  await viewport.press('ArrowLeft');
   await expect(page.locator('[data-page="profile"]')).toHaveAttribute('aria-hidden','false');
 });
 test('keyboard and mouse drag navigate while input gestures stay local',async({page},info)=>{
@@ -123,6 +137,8 @@ test('strict configuration rejects invalid inputs and allows legacy page toggles
     return configs.map(config=>{try{card.setConfig(config);return false;}catch{return true;}});
   });expect(results.every(Boolean)).toBe(true);
   await page.evaluate(()=>card.setConfig({person:'person.example',details:{enabled:false}}));await expect(page.locator('[data-page]')).toHaveCount(1);
+  await page.evaluate(()=>card.setConfig({person:'person.example',swipe:{effect:'coverflow'}}));
+  expect(await page.evaluate(()=>card.config.swipe.effect)).toBe('slide');
 });
 test('editor emits config-changed, filters person, preserves advanced config and reorders',async({page})=>{
   await mount(page);
@@ -150,6 +166,8 @@ test('editor uses the HA entity selector contract when available',async({page})=
   });
   const selector=page.locator('person-central-card-editor ha-selector[data-path="person"]');
   expect(await selector.evaluate(el=>el.selector)).toEqual({entity:{filter:{domain:'person'}}});
+  expect(await selector.evaluate(el=>el.label)).toBe('Entidade da pessoa');
+  await expect(page.locator('person-central-card-editor .field:has(> ha-selector) > span')).toHaveCount(0);
   await selector.evaluate(el=>el.dispatchEvent(new CustomEvent('value-changed',{detail:{value:'person.other'}})));
   expect(await page.evaluate(()=>edited.person)).toBe('person.other');
 });
@@ -159,16 +177,24 @@ test('touch swipe over portrait changes page but never opens more-info; textarea
   await mount(page,full);
   await page.evaluate(()=>{window.moreInfo=0;document.addEventListener('hass-more-info',()=>window.moreInfo++);});
   const client=await page.context().newCDPSession(page);
-  const swipe=async(locator)=>{
-    const box=await locator.boundingBox(),y=box.y+box.height*.5;
-    await client.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:box.x+box.width*.8,y}]});
-    for(let step=1;step<=8;step++)await client.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:box.x+box.width*(.8-.6*step/8),y}]});
+  const swipe=async(locator,{start=.8,end=.2,y=.5}={})=>{
+    const box=await locator.boundingBox(),clientY=box.y+box.height*y;
+    await client.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:box.x+box.width*start,y:clientY}]});
+    for(let step=1;step<=8;step++)await client.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:box.x+box.width*(start+(end-start)*step/8),y:clientY}]});
     await client.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   };
   await swipe(page.locator('.portrait'));
   await expect(page.locator('[data-page="details"]')).toHaveAttribute('aria-hidden','false');
   expect(await page.evaluate(()=>window.moreInfo)).toBe(0);
-  await page.waitForTimeout(450);await go(page,'Notificação');
+  await swipe(page.locator('person-central-details .panel'));
+  await expect(page.locator('[data-page="notification"]')).toHaveAttribute('aria-hidden','false');
+  await swipe(page.locator('person-central-notification form'),{start:.52,end:.97,y:.12});
+  await expect(page.locator('[data-page="details"]')).toHaveAttribute('aria-hidden','false');
+  const viewport=page.locator('person-central-swipe .viewport');
+  await expect.poll(()=>viewport.evaluate(element=>Math.round(element.scrollLeft/element.clientWidth))).toBe(1);
+  await swipe(page.locator('person-central-details .panel'));
+  await expect(page.locator('[data-page="notification"]')).toHaveAttribute('aria-hidden','false');
+  await expect.poll(()=>viewport.evaluate(element=>Math.round(element.scrollLeft/element.clientWidth))).toBe(2);
   await page.locator('textarea').fill('Mensagem preservada');
   await swipe(page.locator('textarea'));
   await expect(page.locator('[data-page="notification"]')).toHaveAttribute('aria-hidden','false');
@@ -207,4 +233,32 @@ test('preview light and dark, compact layout and all editor sections',async({pag
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.evaluate(async()=>{const editor=await customElements.get('person-central-card').getConfigElement();editor.hass=hass;editor.setConfig(card.config);document.body.append(editor);});
   await expect(page.locator('person-central-card-editor summary')).toHaveCount(8);
+});
+
+test('four person cards stay square in a responsive grid',async({page})=>{
+  await mount(page,full);await page.setViewportSize({width:1200,height:900});
+  await page.evaluate(async config=>{
+    const original=document.querySelector('person-central-card'),grid=document.createElement('div');
+    grid.dataset.testGrid='';grid.style.cssText='display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%';
+    original.remove();grid.append(original);document.body.append(grid);
+    for(let index=1;index<4;index++){
+      const card=document.createElement('person-central-card');card.setConfig({person:'person.example',...config});card.hass=hass;grid.append(card);
+    }
+    await Promise.all([...grid.children].map(card=>card.updateComplete));
+  },full);
+  const cards=page.locator('[data-test-grid] person-central-card');await expect(cards).toHaveCount(4);
+  const assertGrid=async()=>{
+    for(let index=0;index<4;index++){
+      const metrics=await cards.nth(index).evaluate(card=>{
+        const ha=card.shadowRoot.querySelector('ha-card'),page=card.shadowRoot.querySelector('person-central-details').shadowRoot.querySelector('.page');
+        return {width:ha.clientWidth,height:ha.clientHeight,overflowX:page.scrollWidth>page.clientWidth};
+      });
+      expect(Math.abs(metrics.width/metrics.height-1)).toBeLessThan(.05);expect(metrics.overflowX).toBe(false);
+    }
+  };
+  await assertGrid();
+  await page.setViewportSize({width:390,height:844});
+  await page.locator('[data-test-grid]').evaluate(grid=>grid.style.gridTemplateColumns='repeat(2,minmax(0,1fr))');
+  await assertGrid();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });

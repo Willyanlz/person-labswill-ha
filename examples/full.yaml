@@ -57,7 +57,7 @@ swipe:
   enabled: true
   show_indicators: true
   loop: false
-  effect: coverflow
+  effect: slide
 colors:
   home: '#50A14F'
   away: '#e45649'
