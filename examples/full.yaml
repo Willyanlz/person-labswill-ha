@@ -1,0 +1,73 @@
+type: custom:person-central-card
+person: person.exemplo
+language: pt
+pages:
+  profile:
+    enabled: true
+  details:
+    enabled: true
+  notification:
+    enabled: true
+page_order:
+  - profile
+  - details
+  - notification
+profile:
+  image:
+    mode: circle
+    size: 65
+    object_fit: cover
+    background_position: center
+  status:
+    enabled: true
+    show_location: true
+    show_ringer: true
+    show_battery: true
+    show_bluetooth: true
+    position: top
+    background: auto
+    border_radius: 18
+    opacity: 0.85
+details:
+  show_image: true
+  show_name: true
+  show_location: true
+  show_battery: true
+  show_battery_state: true
+  show_ringer: true
+  show_bluetooth: true
+sensors:
+  battery: sensor.celular_battery_level
+  battery_state: sensor.celular_battery_state
+  ringer: sensor.celular_ringer_mode
+  bluetooth: binary_sensor.celular_bluetooth_state
+notification:
+  notify_service: notify.mobile_app_seu_celular
+  title: Central
+  critical:
+    enabled: true
+    default: false
+    volume: 1
+appearance:
+  border_radius: 20
+  aspect_ratio: 1
+  padding: 0
+  background: auto
+swipe:
+  enabled: true
+  show_indicators: true
+  loop: false
+  effect: coverflow
+colors:
+  home: '#50A14F'
+  away: '#e45649'
+  zone: '#52adff'
+  unknown: 'var(--secondary-text-color)'
+  bluetooth_on: '#52adff'
+  bluetooth_off: '#e45649'
+  battery_high: '#50A14F'
+  battery_medium: '#FFA500'
+  battery_low: '#e45649'
+  ringer_normal: '#50A14F'
+  ringer_vibrate: '#FFA500'
+  ringer_silent: '#e45649'

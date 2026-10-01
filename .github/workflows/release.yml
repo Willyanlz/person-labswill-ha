@@ -1,0 +1,46 @@
+name: Validate and release
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build && npm run check
+      - run: git diff --exit-code -- dist/person-central-card.js
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+      - name: Check tag version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: node -e "if ('v'+JSON.parse(require('fs').readFileSync('package.json')).version !== process.env.GITHUB_REF_NAME) process.exit(1)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: card
+          path: dist/person-central-card.js
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: card
+      - name: Publish HACS release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" person-central-card.js --verify-tag --title "Person LabsWill HA $TAG" --generate-notes
