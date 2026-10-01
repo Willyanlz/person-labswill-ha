@@ -22,7 +22,12 @@ export class PersonCentralCard extends LitElement {
     };
     // Keep events inside this card, including when embedded in dashboard swipe wrappers.
     for(const event of ['pointerdown','pointermove','pointerup','pointercancel','touchstart','touchmove','touchend','touchcancel','mousedown','mousemove','mouseup','keydown','keyup','click','dblclick']) {
-      this.addEventListener(event,e=>e.stopPropagation());
+      this.addEventListener(event,e=>{
+        e.stopPropagation();
+        if(event==='click'&&!e.composedPath().some(element=>element?.matches?.('button,input,textarea,select,label,[contenteditable=true]'))&&this.config){
+          this.dispatchEvent(new CustomEvent('hass-more-info',{bubbles:true,composed:true,detail:{entityId:this.config.person}}));
+        }
+      });
     }
   }
   setConfig(config) {this.config=normalize(config);this._tracked=null;}

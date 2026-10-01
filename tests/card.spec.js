@@ -186,19 +186,27 @@ test('touch swipe over portrait changes page but never opens more-info; textarea
   await swipe(page.locator('.portrait'));
   await expect(page.locator('[data-page="details"]')).toHaveAttribute('aria-hidden','false');
   expect(await page.evaluate(()=>window.moreInfo)).toBe(0);
-  await swipe(page.locator('person-central-details .panel'));
+  const viewport=page.locator('person-central-swipe .viewport');await viewport.focus();await viewport.press('ArrowRight');
   await expect(page.locator('[data-page="notification"]')).toHaveAttribute('aria-hidden','false');
-  await swipe(page.locator('person-central-notification form'),{start:.52,end:.97,y:.12});
-  await expect(page.locator('[data-page="details"]')).toHaveAttribute('aria-hidden','false');
-  const viewport=page.locator('person-central-swipe .viewport');
-  await expect.poll(()=>viewport.evaluate(element=>Math.round(element.scrollLeft/element.clientWidth))).toBe(1);
-  await swipe(page.locator('person-central-details .panel'));
-  await expect(page.locator('[data-page="notification"]')).toHaveAttribute('aria-hidden','false');
-  await expect.poll(()=>viewport.evaluate(element=>Math.round(element.scrollLeft/element.clientWidth))).toBe(2);
   await page.locator('textarea').fill('Mensagem preservada');
   await swipe(page.locator('textarea'));
   await expect(page.locator('[data-page="notification"]')).toHaveAttribute('aria-hidden','false');
   await expect(page.locator('textarea')).toHaveValue('Mensagem preservada');
+  await swipe(page.locator('person-central-notification form'),{start:.52,end:.97,y:.12});
+  await expect(page.locator('[data-page="details"]')).toHaveAttribute('aria-hidden','false');
+});
+
+test('non-interactive card surface opens person more-info only',async({page})=>{
+  await mount(page,full);
+  await page.evaluate(()=>{window.moreInfoIds=[];document.addEventListener('hass-more-info',event=>window.moreInfoIds.push(event.detail.entityId));});
+  await go(page,'Informações');
+  await page.locator('person-central-details .panel').click({position:{x:20,y:20}});
+  expect(await page.evaluate(()=>window.moreInfoIds)).toEqual(['person.example']);
+  await go(page,'Notificação');
+  await page.locator('person-central-notification textarea').click();
+  await expect(page.locator('person-central-notification button')).toBeVisible();
+  await page.locator('person-central-notification button').click();
+  expect(await page.evaluate(()=>window.moreInfoIds)).toEqual(['person.example']);
 });
 
 test('critical toggle configuration, unavailable notify and stale in-flight completion',async({page})=>{

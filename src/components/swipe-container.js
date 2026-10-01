@@ -89,7 +89,8 @@ export class SwipeContainer extends LitElement {
     }
     this._controlTouch=null;
     if(!this.options.enabled||this.pages.length<2||event.touches.length!==1)return;
-    this._touch={x:event.touches[0].clientX,y:event.touches[0].clientY,index:this.index};
+    this._touch={x:event.touches[0].clientX,y:event.touches[0].clientY,index:this.index,
+      suppressClick:event.composedPath().some(element=>element?.hasAttribute?.('data-swipe-surface'))};
   }
   _touchMove(event) {
     if(!this._controlTouch||event.touches.length!==1)return;
@@ -107,7 +108,10 @@ export class SwipeContainer extends LitElement {
     const start=this._touch;this._touch=null;
     if(!start||!event.changedTouches.length)return;
     const dx=start.x-event.changedTouches[0].clientX,dy=start.y-event.changedTouches[0].clientY;
-    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)){this._ignoreClickUntil=Date.now()+400;this.go(start.index+(dx>0?1:-1));}
+    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)){
+      if(start.suppressClick)this._ignoreClickUntil=Date.now()+400;
+      this.go(start.index+(dx>0?1:-1));
+    }
   }
   _key(event) {
     if(interactive(event)||!['ArrowLeft','ArrowRight'].includes(event.key))return;

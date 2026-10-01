@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4 — 2026-10-01
+
+- Clique em áreas não interativas abre o more-info/mapa da pessoa; controles e swipes ficam isolados.
+- Proteção pós-swipe restrita ao avatar para não bloquear dots e navegação.
+
 ## 1.0.3 — 2026-10-01
 
 - Swipe funciona na área vazia do formulário de notificação sem interferir nos controles.

@@ -154,11 +154,11 @@ O serviço em `notify_service` precisa existir em **Ferramentas de desenvolvedor
 
 | Página | Conteúdo |
 | --- | --- |
-| `profile` | Foto circular, imagem de fundo ou sem foto; status configuráveis em uma barra. A foto abre mais informações da pessoa. |
+| `profile` | Foto circular, imagem de fundo ou sem foto; status configuráveis em uma barra. Tocar em uma área não interativa abre mais informações da pessoa e o mapa quando há coordenadas disponíveis. |
 | `details` | Foto, nome, localização e linhas de sensores disponíveis. Bateria e estado de carga são agrupados quando ambos estão habilitados. |
 | `notification` | Mensagem, toggle Critical opcional, envio e feedback. A página só pode ser habilitada quando `notify_service` é válido. |
 
-O card permite arrastar horizontalmente com mouse ou dedo; os dots e as setas do teclado também navegam entre páginas. A transição combina slide horizontal com um leve ajuste de opacidade e escala, sem rotação 3D. Com uma única página ativa não há navegação ou indicadores desnecessários. A configuração `swipe.enabled: false` desativa o gesto horizontal, mas mantém a navegação por teclado. `swipe.loop: true` permite circular entre a primeira e a última página.
+O card permite arrastar horizontalmente com mouse ou dedo; os dots e as setas do teclado também navegam entre páginas. A transição combina slide horizontal com um leve ajuste de opacidade e escala, sem rotação 3D. Com uma única página ativa não há navegação ou indicadores desnecessários. A configuração `swipe.enabled: false` desativa o gesto horizontal, mas mantém a navegação por teclado. `swipe.loop: true` permite circular entre a primeira e a última página. Tocar em áreas não interativas abre o more-info da entidade `person`; para mostrar o mapa, o Home Assistant precisa ter coordenadas de localização disponíveis.
 
 Gestos iniciados em textarea, toggle, botão ou outros controles não navegam pelas páginas. Isso preserva digitação, seleção e operação por toque. O formulário mantém mensagem e Critical ao navegar ou atualizar estados; após envio bem-sucedido, limpa os campos. Trocar a pessoa ou o serviço redefine o rascunho para evitar enviar para o destinatário errado.
 
