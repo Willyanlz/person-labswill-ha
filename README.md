@@ -2,8 +2,8 @@
 
 [![GitHub Release](https://img.shields.io/github/v/release/Willyanlz/person-labswill-ha)](https://github.com/Willyanlz/person-labswill-ha/releases)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://www.hacs.xyz/docs/faq/custom_repositories/)
-[![Build and tests](https://github.com/Willyanlz/person-labswill-ha/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/Willyanlz/person-labswill-ha/actions/workflows/release.yml)
-[![HACS Validation](https://github.com/Willyanlz/person-labswill-ha/actions/workflows/hacs.yml/badge.svg?branch=main)](https://github.com/Willyanlz/person-labswill-ha/actions/workflows/hacs.yml)
+[![Build and tests](https://github.com/Willyanlz/person-labswill-ha/actions/workflows/release.yml/badge.svg?branch=master)](https://github.com/Willyanlz/person-labswill-ha/actions/workflows/release.yml)
+[![HACS Validation](https://github.com/Willyanlz/person-labswill-ha/actions/workflows/hacs.yml/badge.svg?branch=master)](https://github.com/Willyanlz/person-labswill-ha/actions/workflows/hacs.yml)
 [![License](https://img.shields.io/github/license/Willyanlz/person-labswill-ha)](LICENSE)
 
 **Uma pessoa, as informações do celular e notificações no mesmo card.**
