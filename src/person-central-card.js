@@ -6,7 +6,6 @@ import { personModel, cssValue } from './helpers.js';
 import { cardStyles } from './styles.js';
 import './components/profile-page.js';
 import './components/details-page.js';
-import './components/notification-page.js';
 import './components/swipe-container.js';
 import './person-central-card-editor.js';
 
@@ -15,16 +14,11 @@ export class PersonCentralCard extends LitElement {
   static styles = cardStyles;
   constructor() {
     super();this._revision=0;
-    this._send=(service,payload)=>{
-      const [domain,name]=service.split('.');
-      if(domain!=='notify'||!name||!this._hass?.services?.notify?.[name]) return Promise.reject(new Error('Unavailable notify service'));
-      return this._hass.callService(domain,name,payload);
-    };
     // Keep events inside this card, including when embedded in dashboard swipe wrappers.
     for(const event of ['pointerdown','pointermove','pointerup','pointercancel','touchstart','touchmove','touchend','touchcancel','mousedown','mousemove','mouseup','keydown','keyup','click','dblclick']) {
       this.addEventListener(event,e=>{
         e.stopPropagation();
-        if(event==='click'&&!e.composedPath().some(element=>element?.matches?.('button,input,textarea,select,label,[contenteditable=true]'))&&this.config){
+        if(event==='click'&&this.config?.profile.open_more_info&&!e.composedPath().some(element=>element?.matches?.('button,input,textarea,select,label,[contenteditable=true]'))){
           this.dispatchEvent(new CustomEvent('hass-more-info',{bubbles:true,composed:true,detail:{entityId:this.config.person}}));
         }
       });
@@ -54,7 +48,6 @@ export class PersonCentralCard extends LitElement {
   render() {
     if(!this.config)return nothing;
     const config=this.config, model=personModel(config,this._hass), a=config.appearance;
-    const service=config.notification.notify_service.split('.')[1];
     return html`<ha-card style=${styleMap({
       '--person-radius':`${a.border_radius}px`, '--person-padding':`${a.padding}px`,
       '--person-height':a.card_height ? `${a.card_height}px` : 'auto', '--person-ratio':String(a.aspect_ratio),
@@ -63,8 +56,7 @@ export class PersonCentralCard extends LitElement {
       <person-central-swipe .pages=${config.page_order} .options=${config.swipe} .t=${model.t}>
         ${repeat(config.page_order,id=>id,id=>html`<section class="slide" data-page=${id} aria-label=${model.t(id)}>
           ${id==='profile' ? html`<person-central-profile .config=${config} .model=${model}></person-central-profile>`
-            : id==='details' ? html`<person-central-details .config=${config} .model=${model}></person-central-details>`
-              : html`<person-central-notification .config=${config} .model=${model} .available=${!!this._hass?.services?.notify?.[service]} .send=${this._send}></person-central-notification>`}
+            : html`<person-central-details .config=${config} .model=${model}></person-central-details>`}
         </section>`)}
       </person-central-swipe>
     </ha-card>`;
@@ -76,7 +68,7 @@ customElements.define('person-labswill-ha',class extends PersonCentralCard {});
 window.customCards=window.customCards||[];
 window.customCards.push({
   type:'person-central-card',name:'Person Central Card',preview:true,
-  description:'Profile, device status and notifications for Home Assistant persons.',
+  description:'Profiles, device status and map access for Home Assistant persons.',
   documentationURL:'https://github.com/Willyanlz/person-labswill-ha',
   getEntitySuggestion:(_hass,entityId)=>entityId?.startsWith('person.') ? {config:{type:'custom:person-central-card',person:entityId}} : null,
 });

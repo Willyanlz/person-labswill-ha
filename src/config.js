@@ -1,14 +1,13 @@
-export const PAGE_IDS = ['profile', 'details', 'notification'];
+export const PAGE_IDS = ['profile', 'details'];
 export const DEFAULTS = {
   type: 'custom:person-central-card', person: '', language: 'pt',
-  pages: { profile: { enabled: true }, details: { enabled: true }, notification: { enabled: false } },
-  profile: { image: { mode: 'circle', size: 65, object_fit: 'cover', background_position: 'center' },
+  pages: { profile: { enabled: true }, details: { enabled: true } },
+  profile: { open_more_info: true, image: { mode: 'circle', size: 65, object_fit: 'cover', background_position: 'center' },
     status: { enabled: true, show_location: true, show_ringer: false, show_battery: false, show_bluetooth: false,
       position: 'top', background: 'auto', border_radius: 18, opacity: 0.85 } },
   details: { show_image: true, show_name: true, show_location: true, show_battery: true,
     show_battery_state: true, show_ringer: true, show_bluetooth: true },
   sensors: {},
-  notification: { notify_service: '', title: 'Central', critical: { enabled: true, default: false, volume: 1 } },
   appearance: { border_radius: 20, aspect_ratio: 1, padding: 0, background: 'auto' },
   swipe: { enabled: true, show_indicators: true, loop: false, effect: 'slide' },
   colors: { home: '#50A14F', away: '#e45649', zone: '#52adff', unknown: 'var(--secondary-text-color)',
@@ -29,6 +28,8 @@ export function enabledPages(config) {
 }
 export function normalize(raw, validate = true) {
   const config = merge(DEFAULTS, raw);
+  delete config.pages.notification;
+  delete config.notification;
   for (const id of PAGE_IDS) {
     if (raw?.[id]?.enabled !== undefined && raw?.pages?.[id]?.enabled === undefined) config.pages[id].enabled = raw[id].enabled;
   }
@@ -36,7 +37,7 @@ export function normalize(raw, validate = true) {
   if (raw?.appearance?.status_background !== undefined && raw?.profile?.status?.background === undefined) config.profile.status.background = raw.appearance.status_background;
   if (config.swipe.effect === 'coverflow') config.swipe.effect = 'slide';
   const enabled = enabledPages(config);
-  config.page_order = raw?.page_order ? [...raw.page_order] : enabled;
+  config.page_order = raw?.page_order ? raw.page_order.filter(id => id !== 'notification') : enabled;
   if (!validate) return config;
   if (!/^person\.[a-z0-9_]+$/.test(config.person)) throw new Error('Selecione uma entidade do domínio person.');
   if (!enabled.length) throw new Error('Habilite ao menos uma página.');
@@ -44,13 +45,9 @@ export function normalize(raw, validate = true) {
     config.page_order.some(id => !enabled.includes(id)) || enabled.some(id => !config.page_order.includes(id))) {
     throw new Error('page_order deve conter cada página habilitada exatamente uma vez.');
   }
-  if (config.pages.notification.enabled && !/^notify\.[a-z0-9_]+$/.test(config.notification.notify_service)) {
-    throw new Error('Selecione notification.notify_service (notify.mobile_app_...).');
-  }
   const range = (value, min, max, name) => {
     if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) throw new Error(`${name}: use um número entre ${min} e ${max}.`);
   };
-  range(config.notification.critical.volume, 0, 1, 'critical.volume');
   range(config.profile.image.size, 10, 100, 'profile.image.size');
   range(config.profile.status.opacity, 0, 1, 'profile.status.opacity');
   range(config.profile.status.border_radius, 0, 100, 'profile.status.border_radius');

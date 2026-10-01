@@ -20,7 +20,7 @@ export class SwipeContainer extends LitElement {
   constructor() {
     super();this.pages=[];this.index=0;this.viewport=createRef();this._raf=0;this._controlTouch=null;
     this.addEventListener('click',event=>{
-      if(Date.now()<this._ignoreClickUntil&&event.composedPath().includes(this._ignoreClickTarget)){
+      if(Date.now()<this._ignoreClickUntil&&event.composedPath().includes(this.viewport.value)){
         this._ignoreClickUntil=0;this._ignoreClickTarget=null;
         event.preventDefault();event.stopImmediatePropagation();
       }

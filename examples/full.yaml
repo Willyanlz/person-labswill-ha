@@ -6,12 +6,9 @@ pages:
     enabled: true
   details:
     enabled: true
-  notification:
-    enabled: true
 page_order:
   - profile
   - details
-  - notification
 profile:
   image:
     mode: circle
@@ -41,13 +38,6 @@ sensors:
   battery_state: sensor.celular_battery_state
   ringer: sensor.celular_ringer_mode
   bluetooth: binary_sensor.celular_bluetooth_state
-notification:
-  notify_service: notify.mobile_app_seu_celular
-  title: Central
-  critical:
-    enabled: true
-    default: false
-    volume: 1
 appearance:
   border_radius: 20
   aspect_ratio: 1

@@ -6,9 +6,9 @@
 [![HACS Validation](https://github.com/Willyanlz/person-labswill-ha/actions/workflows/hacs.yml/badge.svg?branch=master)](https://github.com/Willyanlz/person-labswill-ha/actions/workflows/hacs.yml)
 [![License](https://img.shields.io/github/license/Willyanlz/person-labswill-ha)](LICENSE)
 
-**Uma pessoa, as informações do celular e notificações no mesmo card.**
+**Perfil e informações da pessoa em um card responsivo.**
 
-Card Lovelace independente para entidades `person` do Home Assistant. Mostra perfil e localização, reúne sensores opcionais do celular e pode enviar notificações normais ou Critical para um serviço `notify` escolhido por você. Inclui três páginas navegáveis, editor visual e suporte a temas claro e escuro.
+Card Lovelace independente para entidades `person` do Home Assistant. Mostra perfil, localização e sensores opcionais do celular em duas páginas navegáveis, com editor visual e suporte a temas claro e escuro.
 
 ![Prévia da página Perfil](docs/profile.png)
 
@@ -18,15 +18,14 @@ Card Lovelace independente para entidades `person` do Home Assistant. Mostra per
 
 ## Recursos
 
-- Páginas Perfil, Informações e Notificação, habilitáveis e reordenáveis.
+- Páginas Perfil e Informações, habilitáveis e reordenáveis.
 - Swipe por toque, arraste com mouse, teclado e indicadores opcionais; não depende de outros custom cards.
 - Nome e foto obtidos da entidade `person`, com fallback quando a foto ou a entidade não está disponível.
 - Barra de status e detalhes com localização e sensores opcionais de bateria, estado da bateria, ringer e Bluetooth.
-- Envio explícito a um serviço `notify`, com estado do formulário local e payload Critical compatível com iOS.
 - Editor visual com seletor de entidade `person`, preview do nome, validação e controles dependentes da configuração.
 - Sugestão do card no seletor de entidades para pessoas em Home Assistant 2026.6 ou superior.
 
-As páginas Informações e Perfil ficam habilitadas por padrão. Notificação começa desabilitada porque precisa de um serviço `notify` configurado.
+Perfil e Informações ficam habilitadas por padrão.
 
 ## Instalação pelo HACS
 
@@ -74,12 +73,9 @@ pages:
     enabled: true
   details:
     enabled: true
-  notification:
-    enabled: true
 page_order:
   - profile
   - details
-  - notification
 
 profile:
   image:
@@ -113,14 +109,6 @@ sensors:
   ringer: sensor.iphone_julia_ringer_mode
   bluetooth: binary_sensor.iphone_julia_bluetooth_state
 
-notification:
-  notify_service: notify.mobile_app_iphone_julia
-  title: Central
-  critical:
-    enabled: true
-    default: false
-    volume: 1
-
 appearance:
   border_radius: 20
   aspect_ratio: 1
@@ -148,31 +136,27 @@ colors:
   ringer_silent: '#e45649'
 ```
 
-O serviço em `notify_service` precisa existir em **Ferramentas de desenvolvedor → Ações**. O card não tenta deduzir um serviço pelo nome da pessoa. Para testar primeiro sem configurar sensores ou notificações, comece pelo exemplo mínimo e acrescente as opções necessárias.
-
 ## Páginas e interação
 
 | Página | Conteúdo |
 | --- | --- |
 | `profile` | Foto circular, imagem de fundo ou sem foto; status configuráveis em uma barra. Tocar em uma área não interativa abre mais informações da pessoa e o mapa quando há coordenadas disponíveis. |
 | `details` | Foto, nome, localização e linhas de sensores disponíveis. Bateria e estado de carga são agrupados quando ambos estão habilitados. |
-| `notification` | Mensagem, toggle Critical opcional, envio e feedback. A página só pode ser habilitada quando `notify_service` é válido. |
 
 O card permite arrastar horizontalmente com mouse ou dedo; os dots e as setas do teclado também navegam entre páginas. A transição combina slide horizontal com um leve ajuste de opacidade e escala, sem rotação 3D. Com uma única página ativa não há navegação ou indicadores desnecessários. A configuração `swipe.enabled: false` desativa o gesto horizontal, mas mantém a navegação por teclado. `swipe.loop: true` permite circular entre a primeira e a última página. Tocar em áreas não interativas abre o more-info da entidade `person`; para mostrar o mapa, o Home Assistant precisa ter coordenadas de localização disponíveis.
 
-Gestos iniciados em textarea, toggle, botão ou outros controles não navegam pelas páginas. Isso preserva digitação, seleção e operação por toque. O formulário mantém mensagem e Critical ao navegar ou atualizar estados; após envio bem-sucedido, limpa os campos. Trocar a pessoa ou o serviço redefine o rascunho para evitar enviar para o destinatário errado.
+Toque em **Abrir mapa** controla se tocar no card abre mais informações e o mapa da entidade. O mapa depende de coordenadas disponíveis no Home Assistant.
 
 ## Editor visual
 
-O editor está dividido em **Pessoa**, **Páginas**, **Perfil**, **Status**, **Sensores**, **Informações**, **Notificação** e **Aparência**. Ele usa o seletor de entidades do Home Assistant quando disponível e mantém controles HTML como alternativa. Alterações emitem `config-changed` e preservam opções avançadas que não são expostas na interface.
+O editor está dividido em **Pessoa**, **Páginas**, **Perfil**, **Status**, **Sensores**, **Informações** e **Aparência**. Ele usa o seletor de entidades do Home Assistant quando disponível e mantém controles HTML como alternativa. Alterações emitem `config-changed` e preservam opções avançadas que não são expostas na interface.
 
 - **Pessoa:** seleciona apenas entidades do domínio `person` e mostra o nome como preview.
 - **Páginas:** habilita ou desabilita cada página e altera a ordem com os botões de subir/descer. Também controla swipe, indicadores e loop.
-- **Perfil:** escolhe o modo da foto; tamanho e ajuste aparecem para imagem circular, posição aparece para background.
+- **Perfil:** controla **Abrir mapa** e escolhe o modo da foto; tamanho e ajuste aparecem para imagem circular, posição aparece para background.
 - **Status:** habilita a barra e, quando ativa, permite configurar cada indicador, posição e fundo.
 - **Sensores:** escolhe as entidades opcionais de bateria, estado da bateria, ringer e Bluetooth.
 - **Informações:** seleciona quais dados exibir na segunda página.
-- **Notificação:** escolhe ou informa o serviço, título e parâmetros Critical. O editor indica quando falta configurar o serviço.
 - **Aparência:** ajusta raio, altura, proporção, fundo e espaçamento.
 
 ## Opções
@@ -185,12 +169,12 @@ As opções são compatíveis com YAML mesmo quando o card foi criado pelo edito
 | `language` | `pt` | `pt`, `en` ou `auto` para usar o idioma do Home Assistant. |
 | `pages.profile.enabled` | `true` | Exibe a página Perfil. Também aceita o formato legado `profile.enabled`. |
 | `pages.details.enabled` | `true` | Exibe a página Informações. Também aceita `details.enabled`. |
-| `pages.notification.enabled` | `false` | Exibe Notificação; exige `notification.notify_service`. Também aceita `notification.enabled`. |
 | `page_order` | páginas habilitadas | Ordem das páginas habilitadas. Cada página deve aparecer uma única vez. |
 | `profile.image.mode` | `circle` | `circle`, `background` ou `none`. Se não houver foto válida, mostra ícone de pessoa. |
 | `profile.image.size` | `65` | Diâmetro da imagem circular em porcentagem; aceita 10–100. |
 | `profile.image.object_fit` | `cover` | `cover` ou `contain` para imagem circular. |
 | `profile.image.background_position` | `center` | Posição CSS da foto; usada no modo background e como posição do avatar. |
+| `profile.open_more_info` | `true` | Abre mais informações/mapa ao tocar em áreas não interativas do card. |
 | `profile.status.enabled` | `true` | Mostra a barra de status quando existem itens para exibir. |
 | `profile.status.show_location` | `true` | Inclui a localização da entidade `person`. |
 | `profile.status.show_ringer` | `false` | Inclui o sensor `sensors.ringer`, se configurado. |
@@ -208,11 +192,6 @@ As opções são compatíveis com YAML mesmo quando o card foi criado pelo edito
 | `sensors.battery_state` | vazio | Entity ID do estado de carga. |
 | `sensors.ringer` | vazio | Entity ID do modo do celular (`normal`, `vibrate`, `silent`). |
 | `sensors.bluetooth` | vazio | Entity ID do Bluetooth (`on`/`off`). |
-| `notification.notify_service` | vazio | Serviço explícito `notify.nome_do_servico`; obrigatório com a página ativa. |
-| `notification.title` | `Central` | Título enviado na notificação. |
-| `notification.critical.enabled` | `true` | Permite exibir a opção Critical no formulário. |
-| `notification.critical.default` | `false` | Estado inicial do toggle Critical. |
-| `notification.critical.volume` | `1` | Volume Critical entre 0 e 1. |
 | `appearance.border_radius` | `20` | Raio dos cantos do card, em pixels. |
 | `appearance.aspect_ratio` | `1` | Proporção largura/altura; padrão quadrado. Faixa aceita: 0,4–3. |
 | `appearance.card_height` | automático | Altura fixa opcional em pixels, de 180 a 1600. |
@@ -237,12 +216,6 @@ Todas as cores podem ser substituídas por cores CSS válidas, inclusive variáv
 | `colors.battery_high` / `colors.battery_medium` / `colors.battery_low` | Bateria acima de 50%, entre 31–50% e até 30%. |
 | `colors.ringer_normal` / `colors.ringer_vibrate` / `colors.ringer_silent` | Modos normal, vibração e silencioso. |
 
-## Notificações
-
-O card chama o serviço `notify` selecionado, enviando `title` e a mensagem digitada. Mensagens vazias são recusadas, envios simultâneos são bloqueados e o estado de erro permite tentar novamente. Se o serviço não existir ou ficar indisponível, o card informa o problema sem interromper as demais páginas.
-
-Com Critical ativado, o payload inclui `data.push.sound` com `name: default`, `critical: 1` e o volume escolhido. Esse modo é destinado a dispositivos compatíveis, como iOS; o comportamento final depende do serviço e das configurações do aparelho.
-
 ## Tema e acessibilidade
 
 O card usa variáveis CSS do Home Assistant para cores de texto, fundo, divisores e cor primária, sem presumir texto branco. Imagens inválidas ou com protocolo não permitido não são carregadas. O conteúdo de pessoa e mensagem é renderizado como texto, não como HTML.
@@ -259,8 +232,6 @@ Atualize pelo HACS e recarregue completamente o painel. Para instalação manual
 
 **A entidade de pessoa não é aceita.** O campo deve ser um entity ID existente do domínio `person`, por exemplo `person.julia`; sensores, `device_tracker` e zonas não substituem uma entidade `person` nesse campo.
 
-**A página Notificação não habilita ou não envia.** Informe um serviço existente como `notify.mobile_app_iphone_julia`. O nome do serviço deve corresponder a uma ação disponível no Home Assistant. Confirme também que o celular está registrado para receber notificações.
-
 **A bateria, o ringer ou o Bluetooth não aparecem.** Informe o entity ID em `sensors`, confira seu estado em Ferramentas de desenvolvedor e habilite o indicador em Status ou Informações. Sensores não são inferidos automaticamente pelo nome da pessoa.
 
 **A foto ou o nome estão ausentes.** Confira `friendly_name` e `entity_picture` nos atributos da entidade `person`. Sem foto, o card usa o fallback visual; se a entidade estiver indisponível, mostra um estado discreto.
@@ -271,12 +242,12 @@ Atualize pelo HACS e recarregue completamente o painel. Para instalação manual
 
 ## Prévia das páginas
 
-| Perfil | Informações | Notificação |
-| --- | --- | --- |
-| ![Perfil](docs/profile.png) | ![Informações](docs/details.png) | ![Notificação](docs/notification.png) |
+| Perfil | Informações |
+| --- | --- |
+| ![Perfil](docs/profile.png) | ![Informações](docs/details.png) |
 
 Tema escuro: ![Prévia em tema escuro](docs/dark.png)
 
 ## Créditos e limites de validação
 
-O card é distribuído sob a [licença MIT](LICENSE) e inclui Lit no bundle. Os testes Playwright exercitam o editor e o card com estados e serviços Home Assistant simulados. Uma instalação real pelo HACS, o serviço de notificação e o recebimento no dispositivo precisam ser validados no Home Assistant do usuário.
+O card é distribuído sob a [licença MIT](LICENSE) e inclui Lit no bundle. Os testes Playwright exercitam editor, estados, swipe e layout com Home Assistant simulado. Uma instalação real pelo HACS e o mapa dependem de validação no Home Assistant do usuário.

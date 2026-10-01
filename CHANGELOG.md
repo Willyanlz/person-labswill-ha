@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.6 — 2026-10-01
+
+- Removida por completo a página de notificação e todas as opções correspondentes.
+- Toggle **Abrir mapa** no editor para habilitar/desabilitar o more-info da pessoa.
+- Swipe com mouse não abre o mapa ao soltar.
+
+## 1.0.6 — 2026-10-01
+
+- Removida integralmente a página de notificação.
+- Adicionado toggle **Abrir mapa** para controlar o more-info da pessoa.
+- Arraste com mouse não abre o mapa ao soltar.
+
 ## 1.0.5 — 2026-10-01
 
 - Clique sintético após swipe só é suprimido no slide de origem; dots continuam clicáveis imediatamente.

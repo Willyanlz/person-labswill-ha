@@ -1,6 +1,6 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { normalize, enabledPages, PAGE_IDS } from './config.js';
-const names={profile:'Perfil',details:'Informações',notification:'Notificação'};
+const names={profile:'Perfil',details:'Informações'};
 const get=(object,path)=>path.split('.').reduce((value,key)=>value?.[key],object);
 export class PersonCentralCardEditor extends LitElement {
   static properties={hass:{attribute:false},config:{attribute:false},_error:{state:true}};
@@ -61,8 +61,7 @@ export class PersonCentralCardEditor extends LitElement {
   render() {
     if(!this.config)return nothing;
     this._c=normalize(this.config,false);
-    const c=this._c,n=c.notification,p=c.profile;
-    const services=Object.keys(this.hass?.services?.notify||{}).map(key=>`notify.${key}`);
+    const c=this._c,p=c.profile;
     return html`<p class="hint">Person Central Card · LabsWill</p>
       ${this._error?html`<p class="error" role="alert">${this._error}</p>`:nothing}
       <details open><summary>Pessoa</summary>${this._entity('person','Entidade da pessoa',true)}
@@ -74,6 +73,7 @@ export class PersonCentralCardEditor extends LitElement {
         ${this._toggle('swipe.enabled','Permitir swipe')}${this._toggle('swipe.show_indicators','Indicadores de página')}${this._toggle('swipe.loop','Navegação circular')}
       </details>
       ${c.pages.profile.enabled?html`<details><summary>Perfil</summary>
+        ${this._toggle('profile.open_more_info','Abrir mapa')}
         ${this._select('profile.image.mode','Modo da imagem',[['circle','Redonda'],['background','Fundo'],['none','Nenhuma']])}
         ${p.image.mode==='circle'?html`${this._text('profile.image.size','Tamanho da imagem (%)','number',10,100)}${this._select('profile.image.object_fit','Ajuste',[['cover','Preencher'],['contain','Imagem inteira']])}`:nothing}
         ${p.image.mode==='background'?this._text('profile.image.background_position','Posição do fundo (ex.: center top)'):nothing}
@@ -84,14 +84,6 @@ export class PersonCentralCardEditor extends LitElement {
       <details><summary>Sensores</summary><p class="hint">Opcionais. Para exibir na barra, habilite também o indicador em Status.</p>
         ${this._entity('sensors.battery','Bateria')}${this._entity('sensors.battery_state','Estado da bateria')}${this._entity('sensors.ringer','Modo do celular')}${this._entity('sensors.bluetooth','Bluetooth')}</details>
       ${c.pages.details.enabled?html`<details><summary>Informações</summary>${[['image','Foto'],['name','Nome'],['location','Localização'],['battery','Bateria'],['battery_state','Estado da bateria'],['ringer','Modo do celular'],['bluetooth','Bluetooth']].map(([key,label])=>this._toggle(`details.show_${key}`,label))}</details>`:nothing}
-      <details ?open=${c.pages.notification.enabled&&!n.notify_service}><summary>Notificação</summary>${this._toggle('pages.notification.enabled','Ativar página de notificação')}
-        ${c.pages.notification.enabled?html`<label class="field"><span>Serviço notify</span><input data-path="notification.notify_service" list="notify-services" .value=${n.notify_service}
-          placeholder="notify.mobile_app_seu_celular" @input=${e=>this._set('notification.notify_service',e.target.value)}></label>
-          <datalist id="notify-services">${services.map(service=>html`<option value=${service}></option>`)}</datalist>
-          ${!n.notify_service?html`<p class="error" role="alert">Selecione um serviço notify para habilitar o envio.</p>`:nothing}
-          ${this._text('notification.title','Título da notificação')}${this._toggle('notification.critical.enabled','Permitir alertas críticos (iOS)')}
-          ${n.critical.enabled?html`${this._toggle('notification.critical.default','Alertas críticos ativados por padrão')}${this._text('notification.critical.volume','Volume do alerta crítico','number',0,1,.05)}`:nothing}`:nothing}
-      </details>
       <details><summary>Aparência</summary>${this._text('appearance.border_radius','Raio dos cantos (px)','number',0,100)}${this._text('appearance.card_height','Altura fixa opcional (px)','number',180,1600)}
         ${this._text('appearance.aspect_ratio','Proporção largura/altura','number',.4,3,.1)}${this._text('appearance.background','Fundo (auto ou cor CSS)')}${this._text('appearance.padding','Espaçamento interno (px)','number',0,100)}</details>`;
   }

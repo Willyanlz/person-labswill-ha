@@ -15,7 +15,9 @@ export class ProfilePage extends LitElement {
     .item ha-icon{width:21px;height:21px;--mdc-icon-size:21px}
     .unavailable{position:absolute;bottom:8px;left:8px;font-size:11px;background:var(--card-background-color,#fff);border-radius:8px;padding:4px 8px}
   `];
-  _moreInfo() { this.dispatchEvent(new CustomEvent('hass-more-info', {bubbles:true, composed:true, detail:{entityId:this.config.person}})); }
+  _moreInfo() {
+    if(this.config.profile.open_more_info)this.dispatchEvent(new CustomEvent('hass-more-info', {bubbles:true, composed:true, detail:{entityId:this.config.person}}));
+  }
   render() {
     if (!this.model || !this.config) return nothing;
     const {image, status} = this.config.profile;

@@ -11,11 +11,7 @@ e briefing funcional. Nenhum nome, sensor ou serviço pessoal da referência é 
 | Barra superior clara, opacidade .85, raio 18 | Barra modular em profile; fundo segue o tema e aceita substituição |
 | Localização, ringer, bateria com porcentagem, Bluetooth | `helpers.js`: valores, ícones e limites 30/50, cores configuráveis |
 | Foto pequena, nome e quatro linhas de detalhes | `details-page.js`; nome dinâmico do person, carregamento normalizado |
-| Textarea, Critical e Enviar | `notification-page.js`, estado reativo local, sem helpers |
-| Título Central e notify mobile_app explícito | Serviço selecionado pelo usuário; payload normal/crítico compatível com o protótipo |
-| Mensagem vazia, enviando, sucesso, erro | Validação, feedback acessível, bloqueio de envio duplo; sucesso limpa mensagem e Critical |
-| Proteção dos inputs contra swipe e ações do button-card | Gestos iniciados em controles são ignorados pelo swipe; touch-action pan-y no formulário |
-| Limpeza após envio e manutenção durante atualizações HA | Lit preserva DOM/estado; troca de pessoa reinicia o formulário para evitar envio ao destinatário errado |
+| Toque para abrir mapa da pessoa | `profile.open_more_info` controla o evento `hass-more-info` no card |
 | Atualizações de estados e ausência de sensores | Apenas entidades relevantes disparam atualização; estados desconhecidos neutros, sensores não configurados omitidos |
 
 ## Decisões técnicas
@@ -27,6 +23,7 @@ e briefing funcional. Nenhum nome, sensor ou serviço pessoal da referência é 
   lifecycle Lit e eventos declarativos garantem inicialização e limpeza.
 - Estados ausentes não são apresentados como Bluetooth desligado ou bateria verde.
   Isso corrige informação enganosa sem retirar a função original.
-- Perfil e detalhes ativos inicialmente; notificação exige serviço explícito.
+- Perfil e informações ativas inicialmente; mapa abre por toque por padrão e pode ser desativado no editor.
+- A página de notificação foi removida: este card agora se concentra em perfil, sensores e mapa da pessoa.
 - O clique padrão de mais informações do button-card é preservado na foto do perfil;
   o formulário não executa ações de clique/hold/double-tap do card ancestral.
