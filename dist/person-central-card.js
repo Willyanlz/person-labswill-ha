@@ -1,4 +1,4 @@
-/*! Person LabsWill HA v1.0.0 | MIT | github.com/Willyanlz/person-labswill-ha */
+/*! Person LabsWill HA v1.0.1 | MIT | github.com/Willyanlz/person-labswill-ha */
 /**
  * @license
  * Copyright 2019 Google LLC

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1 — 2026-10-01
+
+- Estabilizada a sincronização dos testes de navegação em diferentes plataformas Chromium.
+
 ## 1.0.0 — 2026-10-01
 
 - Perfil, informações e notificação em páginas reordenáveis.

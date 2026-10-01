@@ -23,7 +23,7 @@ async function go(page,id){
   const viewport=page.locator('person-central-swipe .viewport');
   await dot.click();await expect(dot).toHaveAttribute('aria-current','true');
   const target=await dot.evaluate(el=>[...el.parentElement.querySelectorAll('.dot')].indexOf(el));
-  await expect.poll(()=>viewport.evaluate((element,index)=>Math.abs(element.scrollLeft/element.clientWidth-index),target)).toBeLessThan(.01);
+  await expect.poll(()=>viewport.evaluate(element=>Math.round(element.scrollLeft/element.clientWidth))).toBe(target);
 }
 test('minimal card, defaults, picker and person suggestions',async({page})=>{
   await mount(page);
