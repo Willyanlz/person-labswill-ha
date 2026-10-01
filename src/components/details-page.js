@@ -4,8 +4,12 @@ import './avatar.js';
 export class DetailsPage extends LitElement {
   static properties = { config: {attribute:false}, model: {attribute:false} };
   static styles = [pageStyles, css`
-    .rows{display:grid;grid-template-columns:24px minmax(0,1fr);gap:clamp(10px,4cqw,18px) 14px;align-items:center}
-    .value{font-size:16px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+    .page{padding:8px 0}
+    .panel{padding:clamp(10px,4cqw,18px)}
+    .avatar{width:64px;height:64px;margin-bottom:8px}
+    h2{margin-bottom:12px}
+    .rows{display:grid;grid-template-columns:24px minmax(0,1fr);gap:clamp(8px,3cqw,12px) 12px;align-items:center}
+    .value{font-size:clamp(14px,4cqw,16px);font-weight:600;line-height:1.3;overflow-wrap:anywhere}
     .muted{margin-bottom:3px}
   `];
   render() {

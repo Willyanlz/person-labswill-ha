@@ -18,7 +18,13 @@ async function mount(page, config={}) {
   await expect(page.locator('ha-card')).toBeVisible();
 }
 const full={pages:{profile:{enabled:true},details:{enabled:true},notification:{enabled:true}},sensors:{battery:'sensor.battery',battery_state:'sensor.charge',ringer:'sensor.ringer',bluetooth:'binary_sensor.bluetooth'},profile:{status:{show_battery:true,show_ringer:true,show_bluetooth:true}},notification:{notify_service:'notify.mobile_app_example'}};
-async function go(page,id){await page.locator(`person-central-swipe .dot[aria-label="${id}"]`).click();await expect(page.locator(`person-central-swipe .dot[aria-label="${id}"]`)).toHaveAttribute('aria-current','true');await page.waitForTimeout(350);}
+async function go(page,id){
+  const dot=page.locator(`person-central-swipe .dot[aria-label="${id}"]`);
+  const viewport=page.locator('person-central-swipe .viewport');
+  await dot.click();await expect(dot).toHaveAttribute('aria-current','true');
+  const target=await dot.evaluate(el=>[...el.parentElement.querySelectorAll('.dot')].indexOf(el));
+  await expect.poll(()=>viewport.evaluate((element,index)=>Math.abs(element.scrollLeft/element.clientWidth-index),target)).toBeLessThan(.01);
+}
 test('minimal card, defaults, picker and person suggestions',async({page})=>{
   await mount(page);
   await expect(page.locator('[data-page]')).toHaveCount(2);
@@ -163,7 +169,8 @@ test('touch swipe over portrait changes page but never opens more-info; textarea
   await expect(page.locator('[data-page="details"]')).toHaveAttribute('aria-hidden','false');
   expect(await page.evaluate(()=>window.moreInfo)).toBe(0);
   await page.waitForTimeout(450);await go(page,'Notificação');
-  await page.locator('textarea').fill('Mensagem preservada');await swipe(page.locator('textarea'));
+  await page.locator('textarea').fill('Mensagem preservada');
+  await swipe(page.locator('textarea'));
   await expect(page.locator('[data-page="notification"]')).toHaveAttribute('aria-hidden','false');
   await expect(page.locator('textarea')).toHaveValue('Mensagem preservada');
 });
@@ -189,7 +196,9 @@ test('preview light and dark, compact layout and all editor sections',async({pag
   await page.locator('person-central-profile img').evaluate(img=>img.decode());
   if(info.project.name==='chromium'){
     await page.locator('person-central-card').screenshot({path:'docs/profile.png'});
-    await go(page,'Informações');await page.locator('person-central-card').screenshot({path:'docs/details.png'});
+    await go(page,'Informações');
+    await expect.poll(()=>page.locator('person-central-details .page').evaluate(el=>el.scrollHeight-el.clientHeight)).toBeLessThanOrEqual(1);
+    await page.locator('person-central-card').screenshot({path:'docs/details.png'});
     await go(page,'Notificação');await page.locator('person-central-card').screenshot({path:'docs/notification.png'});
     await page.addStyleTag({content:':root{--primary-text-color:#e2e8f0;--secondary-text-color:#94a3b8;--card-background-color:#182538;--secondary-background-color:#26364c;--divider-color:#34465e}body{background:#0f172a}'});
     await page.locator('person-central-card').screenshot({path:'docs/dark.png'});

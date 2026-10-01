@@ -8,6 +8,7 @@ export class SwipeContainer extends LitElement {
     .shell{display:flex;flex-direction:column;height:100%;min-height:0}
     .viewport{display:flex;flex:1;min-height:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x pan-y;outline-offset:-3px;perspective:1000px}
     .viewport::-webkit-scrollbar{display:none} .viewport.disabled{overflow:hidden;touch-action:pan-y}
+    .viewport.control-touch{overflow-x:hidden;scroll-snap-type:none;touch-action:pan-y}
     .viewport.dragging{scroll-snap-type:none;cursor:grabbing;user-select:none}
     ::slotted(*){flex:0 0 100%;width:100%;height:100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always}
     nav{display:flex;align-items:center;justify-content:center;gap:4px;flex:0 0 32px;padding:0 6px}
@@ -18,13 +19,13 @@ export class SwipeContainer extends LitElement {
     @media(prefers-reduced-motion:reduce){::slotted(*){transform:none!important}}
   `;
   constructor() {
-    super();this.pages=[];this.index=0;this.viewport=createRef();this._raf=0;
+    super();this.pages=[];this.index=0;this.viewport=createRef();this._raf=0;this._controlTouch=null;
     this.addEventListener('click',event=>{
       if(Date.now()<this._ignoreClickUntil){event.preventDefault();event.stopImmediatePropagation();}
     },true);
   }
   connectedCallback() {super.connectedCallback();this._observer=new ResizeObserver(()=>this.go(this.index,false));this._observer.observe(this);}
-  disconnectedCallback() {super.disconnectedCallback();this._observer?.disconnect();cancelAnimationFrame(this._raf);this._drag=null;this._touch=null;}
+  disconnectedCallback() {super.disconnectedCallback();this._observer?.disconnect();cancelAnimationFrame(this._raf);this._drag=null;this._touch=null;this._controlTouch=null;}
   updated(changed) {
     if (changed.has('pages')) {
       const old=changed.get('pages') || [];
@@ -81,10 +82,29 @@ export class SwipeContainer extends LitElement {
   }
   _touchStart(event) {
     this._touch=null;
-    if(interactive(event)||!this.options.enabled||this.pages.length<2||event.touches.length!==1)return;
+    if(interactive(event)){
+      const touch=event.touches[0];
+      this._controlTouch={x:touch.clientX,y:touch.clientY,scrollLeft:this.viewport.value?.scrollLeft||0,index:this.index};
+      this.viewport.value?.classList.add('control-touch');
+      return;
+    }
+    this._controlTouch=null;
+    if(!this.options.enabled||this.pages.length<2||event.touches.length!==1)return;
     this._touch={x:event.touches[0].clientX,y:event.touches[0].clientY,index:this.index};
   }
+  _touchMove(event) {
+    if(!this._controlTouch||event.touches.length!==1)return;
+    const touch=event.touches[0],dx=touch.clientX-this._controlTouch.x,dy=touch.clientY-this._controlTouch.y;
+    if(Math.abs(dx)>Math.abs(dy)){
+      if(event.cancelable)event.preventDefault();
+      if(this.viewport.value)this.viewport.value.scrollLeft=this._controlTouch.scrollLeft;
+    }
+  }
   _touchEnd(event) {
+    const control=this._controlTouch;
+    this._controlTouch=null;
+    this.viewport.value?.classList.remove('control-touch');
+    if(control){this.go(control.index,false);return;}
     const start=this._touch;this._touch=null;
     if(!start||!event.changedTouches.length)return;
     const dx=start.x-event.changedTouches[0].clientX,dy=start.y-event.changedTouches[0].clientY;
@@ -99,7 +119,7 @@ export class SwipeContainer extends LitElement {
     return html`<div class="shell"><div ${ref(this.viewport)} class=${`viewport ${!multiple||!this.options?.enabled?'disabled':''}`} tabindex="0" role="region" aria-label="Person Central"
       @scroll=${this._scroll} @keydown=${this._key} @pointerdown=${this._down} @pointermove=${this._move} @pointerup=${this._up}
       @pointercancel=${() => {this._drag=null;this.viewport.value?.classList.remove('dragging');this.go(this.index,false);}}
-      @touchstart=${this._touchStart} @touchend=${this._touchEnd} @touchcancel=${()=>{this._touch=null;}}><slot></slot></div>
+      @touchstart=${this._touchStart} @touchmove=${this._touchMove} @touchend=${this._touchEnd} @touchcancel=${()=>{this._touch=null;this._controlTouch=null;this.viewport.value?.classList.remove('control-touch');}}><slot></slot></div>
       ${multiple ? html`<nav aria-label="Páginas"><button aria-label=${t('previous')} ?disabled=${!this.options.loop&&this.index===0} @click=${()=>this.go(this.index-1)}>‹</button>
         ${this.options.show_indicators ? this.pages.map((id,i)=>html`<button class="dot" aria-label=${t(id)} aria-current=${String(i===this.index)} @click=${()=>this.go(i)}></button>`) : nothing}
         <button aria-label=${t('next')} ?disabled=${!this.options.loop&&this.index===this.pages.length-1} @click=${()=>this.go(this.index+1)}>›</button></nav>` : nothing}
