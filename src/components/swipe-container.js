@@ -20,7 +20,10 @@ export class SwipeContainer extends LitElement {
   constructor() {
     super();this.pages=[];this.index=0;this.viewport=createRef();this._raf=0;this._controlTouch=null;
     this.addEventListener('click',event=>{
-      if(Date.now()<this._ignoreClickUntil){event.preventDefault();event.stopImmediatePropagation();}
+      if(Date.now()<this._ignoreClickUntil&&event.composedPath().includes(this._ignoreClickTarget)){
+        this._ignoreClickUntil=0;this._ignoreClickTarget=null;
+        event.preventDefault();event.stopImmediatePropagation();
+      }
     },true);
   }
   connectedCallback() {super.connectedCallback();this._observer=new ResizeObserver(()=>this.go(this.index,false));this._observer.observe(this);}
@@ -64,8 +67,12 @@ export class SwipeContainer extends LitElement {
     });
   }
   _down(event) {
+    if(this._ignoreClickTarget&&!event.composedPath().includes(this._ignoreClickTarget)){
+      this._ignoreClickUntil=0;this._ignoreClickTarget=null;
+    }
     if (event.pointerType!=='mouse' || event.button!==0 || interactive(event) || !this.options.enabled || this.pages.length<2) return;
-    this._drag={id:event.pointerId,x:event.clientX,start:this.viewport.value.scrollLeft,index:this.index};
+    this._drag={id:event.pointerId,x:event.clientX,start:this.viewport.value.scrollLeft,index:this.index,
+      clickTarget:event.composedPath().find(element=>element?.matches?.('[data-page]'))};
     this.viewport.value.setPointerCapture(event.pointerId);
     this.viewport.value.classList.add('dragging');
   }
@@ -76,11 +83,14 @@ export class SwipeContainer extends LitElement {
     this.viewport.value.classList.remove('dragging');
     if(this.viewport.value.hasPointerCapture(drag.id)) this.viewport.value.releasePointerCapture(drag.id);
     const dx=drag.x-event.clientX;
-    if(Math.abs(dx)>40)this._ignoreClickUntil=Date.now()+400;
+    if(Math.abs(dx)>40){this._ignoreClickUntil=Date.now()+400;this._ignoreClickTarget=drag.clickTarget;}
     this.go(Math.abs(dx)>40 ? drag.index+(dx>0?1:-1) : drag.index);
   }
   _touchStart(event) {
     this._touch=null;
+    if(this._ignoreClickTarget&&!event.composedPath().includes(this._ignoreClickTarget)){
+      this._ignoreClickUntil=0;this._ignoreClickTarget=null;
+    }
     if(interactive(event)){
       const touch=event.touches[0];
       this._controlTouch={x:touch.clientX,y:touch.clientY,scrollLeft:this.viewport.value?.scrollLeft||0,index:this.index};
@@ -90,7 +100,8 @@ export class SwipeContainer extends LitElement {
     this._controlTouch=null;
     if(!this.options.enabled||this.pages.length<2||event.touches.length!==1)return;
     this._touch={x:event.touches[0].clientX,y:event.touches[0].clientY,index:this.index,
-      suppressClick:event.composedPath().some(element=>element?.hasAttribute?.('data-swipe-surface'))};
+      suppressClick:event.composedPath().some(element=>element?.hasAttribute?.('data-swipe-surface')),
+      clickTarget:event.composedPath().find(element=>element?.matches?.('[data-page]'))};
   }
   _touchMove(event) {
     if(!this._controlTouch||event.touches.length!==1)return;
@@ -109,7 +120,7 @@ export class SwipeContainer extends LitElement {
     if(!start||!event.changedTouches.length)return;
     const dx=start.x-event.changedTouches[0].clientX,dy=start.y-event.changedTouches[0].clientY;
     if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)){
-      if(start.suppressClick)this._ignoreClickUntil=Date.now()+400;
+      if(start.suppressClick){this._ignoreClickUntil=Date.now()+400;this._ignoreClickTarget=start.clickTarget;}
       this.go(start.index+(dx>0?1:-1));
     }
   }

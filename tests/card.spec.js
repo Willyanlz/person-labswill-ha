@@ -186,8 +186,7 @@ test('touch swipe over portrait changes page but never opens more-info; textarea
   await swipe(page.locator('.portrait'));
   await expect(page.locator('[data-page="details"]')).toHaveAttribute('aria-hidden','false');
   expect(await page.evaluate(()=>window.moreInfo)).toBe(0);
-  const viewport=page.locator('person-central-swipe .viewport');await viewport.focus();await viewport.press('ArrowRight');
-  await expect(page.locator('[data-page="notification"]')).toHaveAttribute('aria-hidden','false');
+  await go(page,'Notificação');
   await page.locator('textarea').fill('Mensagem preservada');
   await swipe(page.locator('textarea'));
   await expect(page.locator('[data-page="notification"]')).toHaveAttribute('aria-hidden','false');

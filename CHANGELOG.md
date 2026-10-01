@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5 — 2026-10-01
+
+- Clique sintético após swipe só é suprimido no slide de origem; dots continuam clicáveis imediatamente.
+
 ## 1.0.4 — 2026-10-01
 
 - Clique em áreas não interativas abre o more-info/mapa da pessoa; controles e swipes ficam isolados.
